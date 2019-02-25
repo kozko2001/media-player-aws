@@ -1,9 +1,9 @@
 import Dependencies._
 
 ThisBuild / scalaVersion     := "2.12.8"
-ThisBuild / version          := "0.1.0-SNAPSHOT"
-ThisBuild / organization     := "com.example"
-ThisBuild / organizationName := "example"
+ThisBuild / version          := "0.1"
+ThisBuild / organization     := "net.allocsoc.media-player-aws"
+ThisBuild / organizationName := "allocsoc"
 
 lazy val root = (project in file("."))
   .settings(
