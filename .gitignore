@@ -1,2 +1,8 @@
 terraform.tfstate
 .terraform
+
+api/.ensime
+api/.ensime_cache
+api/.sbt-hydra-history
+api/project/target
+api/target
