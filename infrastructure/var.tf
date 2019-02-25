@@ -12,3 +12,8 @@ variable "tag" {
 variable "name-suffix" {
   type   = "string"
 }
+
+variable "jar" {
+  type    = "string"
+  default = "../api/target/scala-2.12/MediaPlayerAwsAPI-assembly-0.1.jar"
+}
