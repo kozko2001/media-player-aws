@@ -10,9 +10,11 @@ lazy val root = (project in file("."))
     name := "MediaPlayerAwsAPI",
     libraryDependencies ++= Seq(
       scalaTest % Test,
+      scalaMockito % Test,
       amazonlambda,
       amazons3,
-      amazonevents
+      amazonevents,
+      playbjson
     )
   )
 
