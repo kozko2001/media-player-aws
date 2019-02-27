@@ -8,6 +8,7 @@ import org.mockito.Mockito._
 import play.api.libs.json._
 
 
+
 class HandlerSpec extends WordSpec with MockitoSugar with Matchers  {
   "Given a valid info.json request" when {
     val req = mock[APIGatewayProxyRequestEvent]

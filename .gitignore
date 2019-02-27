@@ -7,3 +7,5 @@ api/.sbt-hydra-history
 api/project/target
 api/target
 api/project/project
+
+.envrc

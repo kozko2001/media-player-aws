@@ -14,7 +14,7 @@ lazy val root = (project in file("."))
       amazonlambda,
       amazons3,
       amazonevents,
-      playbjson
+      playjson
     )
   )
 
