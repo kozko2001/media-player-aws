@@ -13,14 +13,22 @@ import scala.collection.JavaConverters._
 
 
 class HandlerSpec extends WordSpec with MockitoSugar with Matchers  {
+  val s3Client = mock[AmazonS3Client]
+
+  class AppModuleTest extends AppModule {
+    override lazy val s3Client = HandlerSpec.this.s3Client
+  }
+
   "Given a valid info.json request" when {
+    val module = new AppModuleTest()
+
     val req = mock[APIGatewayProxyRequestEvent]
     val context = mock[Context]
 
     when(req.getPath) thenReturn "info.json"
 
     "the s3 bucket has 2 files" when {
-      val s3Client = mock[AmazonS3Client]
+
       val objectListing = mock[ObjectListing]
       val obj1 = HandlerSpec.objectCreate("CelineDion-Titanic.mp3")
       val obj2 = HandlerSpec.objectCreate("LaMacarena")
@@ -28,9 +36,8 @@ class HandlerSpec extends WordSpec with MockitoSugar with Matchers  {
       when(s3Client.listObjects(anyString(), anyString())) thenReturn objectListing
       when(objectListing.getObjectSummaries) thenReturn (obj1 :: obj2 :: Nil) .asJava
 
-      ".handleRequest response has a couple of media files" in {
-        val handler = new Handler()
-        handler.s3Client = s3Client
+      ".handlerequest response has a couple of media files" in {
+        val handler = module.lambdaHandler
 
         val response = handler.handleRequest(req, context)
 

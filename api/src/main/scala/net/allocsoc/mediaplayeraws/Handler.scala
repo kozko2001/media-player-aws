@@ -7,28 +7,37 @@ import scala.collection.JavaConverters._
 import play.api.libs.json._
 import collection.JavaConverters._
 
-class Handler extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent] {
-  implicit val infoResponseFormat = Json.format[InfoResponse]
-  var s3Client = AmazonS3ClientBuilder.defaultClient()
+class Handler extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent] with AppModule {
 
   def handleRequest(req: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent = {
-    val logger = context.getLogger()
+    val handler = lambdaHandler
 
-    val infoResponse = InfoResponse(handlerInfo.listOfFilesInBucket())
-
-    return new APIGatewayProxyResponseEvent()
-      .withBody(Json.toJson(infoResponse).toString())
-      .withStatusCode(200)
-      .withHeaders(Map("Content-Type" -> "text/html; charset=utf-8").asJava)
+    handler.handleRequest(req, context)
   }
-
-  def handlerInfo() = new HandlerInfoJson(s3Client)
-
 }
 
-class HandlerInfoJson(s3Client: AmazonS3) {
+class LambdaHandler(infoHandler: InfoHandler) {
+  def handleRequest(req: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent = {
 
-  def listOfFilesInBucket() = {
+    val response = infoHandler.handler()
+
+    return new APIGatewayProxyResponseEvent()
+      .withBody(response)
+      .withStatusCode(200)
+      .withHeaders(Map("Content-Type" -> "application/json").asJava)
+
+  }
+}
+
+class InfoHandler(s3Client: AmazonS3) {
+  implicit val infoResponseFormat = Json.format[InfoResponse]
+
+  def handler(): String = {
+    val files = listOfFilesInBucket()
+    Json.toJson(InfoResponse(files)) toString
+  }
+
+  private def listOfFilesInBucket() = {
     val bucketName = "media-player-aws-kzk"
     val prefix = "music/"
 
