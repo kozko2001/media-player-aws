@@ -5,6 +5,7 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.{ ObjectListing, S3ObjectSummary }
+import java.net.URL
 import org.scalatest.{ Matchers, WordSpec }
 import org.scalatest.mockito.MockitoSugar
 import org.mockito.ArgumentMatchers._
@@ -23,7 +24,7 @@ class HandlerSpec extends WordSpec with MockitoSugar with Matchers  {
     val req = mock[APIGatewayProxyRequestEvent]
     val context = mock[Context]
 
-    when(req.getPath) thenReturn "info.json"
+    when(req.getPath) thenReturn "/info.json"
 
     "the s3 bucket has 2 files" when {
       val objectListing = mock[ObjectListing]
@@ -62,6 +63,47 @@ class HandlerSpec extends WordSpec with MockitoSugar with Matchers  {
 
         response.getStatusCode shouldBe 500
       }
+    }
+  }
+
+  "Given a valid download request" when {
+    val fakePresignedUrl = new URL("http://download.me")
+    val context = mock[Context]
+    val req = mock[APIGatewayProxyRequestEvent]
+
+    when(req.getPath) thenReturn "download/CelineDion-Titanic.mp3"
+
+    "the s3 bucket has the file" when {
+      val module = new AppModuleTest()
+      val s3Client = module.s3Client
+
+      when(s3Client.generatePresignedUrl(any())) thenReturn fakePresignedUrl
+
+      ".handleRequest response returns a redirect" ignore {
+        val handler = module.lambdaHandler
+
+        val response = handler.handleRequest(req, context)
+
+        response.getStatusCode shouldBe 201
+        response.getBody shouldBe ""
+        response.getHeaders shouldBe Map("Location" -> fakePresignedUrl.toString).asJava
+      }
+    }
+  }
+
+  "Given a unvalid request" when {
+    val context = mock[Context]
+    val req = mock[APIGatewayProxyRequestEvent]
+    val module = new AppModuleTest()
+
+    when(req.getPath) thenReturn "/random----"
+
+    ".handleRequest response should be unknown" in {
+      val handler = module.lambdaHandler
+
+      val response = handler.handleRequest(req, context)
+
+      response.getBody shouldBe """{"error": "Unknown command"}"""
     }
   }
 }

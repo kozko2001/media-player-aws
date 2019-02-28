@@ -7,4 +7,5 @@ trait AppModule {
   lazy val s3Client = AmazonS3ClientBuilder.defaultClient
   lazy val infoHandler = wire[InfoHandler]
   lazy val lambdaHandler = wire[LambdaHandler]
+  lazy val unknownHandler = wire[UnknownHandler]
 }
