@@ -12,15 +12,6 @@ resource "aws_s3_bucket" "bucket" {
   }
 }
 
-## create the zip for the lambda
-provider "archive" {}
-
-data "archive_file" "zip" {
-  type        = "zip"
-  source_file = "index.js"
-  output_path = "payload.zip"
-}
-
 ## lambda
 data "aws_iam_policy_document" "policy" {
   statement {
@@ -64,7 +55,7 @@ resource "aws_lambda_function" "lambda" {
 
    runtime = "java8"
    timeout = 30
-
+   memory_size = 256
 }
 
 ## lambda logging

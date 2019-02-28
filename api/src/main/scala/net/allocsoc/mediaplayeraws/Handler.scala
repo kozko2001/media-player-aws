@@ -1,5 +1,6 @@
 package net.allocsoc.mediaplayeraws
 
+import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.lambda.runtime.events.{ APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent }
 import com.amazonaws.services.lambda.runtime.{ Context, RequestHandler }
 import com.amazonaws.services.s3.{ AmazonS3, AmazonS3Client, AmazonS3ClientBuilder }
@@ -17,15 +18,23 @@ class Handler extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProx
 }
 
 class LambdaHandler(infoHandler: InfoHandler) {
+  def errorResponse(message:String) = new APIGatewayProxyResponseEvent()
+    .withBody(s"""{"error": "${message}"}""") // TODO THIS SHOULD BE USING JSON!
+    .withStatusCode(500)
+    .withHeaders(Map("Content-Type" -> "application/json").asJava)
+
   def handleRequest(req: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent = {
 
-    val response = infoHandler.handler()
+    val response = try {
+      infoHandler.handler()
+    } catch {
+      case e: AmazonServiceException => return errorResponse(e.getMessage)
+    }
 
     return new APIGatewayProxyResponseEvent()
       .withBody(response)
       .withStatusCode(200)
       .withHeaders(Map("Content-Type" -> "application/json").asJava)
-
   }
 }
 
