@@ -71,7 +71,7 @@ class HandlerSpec extends WordSpec with MockitoSugar with Matchers  {
     val context = mock[Context]
     val req = mock[APIGatewayProxyRequestEvent]
 
-    when(req.getPath) thenReturn "download/CelineDion-Titanic.mp3"
+    when(req.getPath) thenReturn "/download/CelineDion-Titanic.mp3"
 
     "the s3 bucket has the file" when {
       val module = new AppModuleTest()
@@ -79,12 +79,12 @@ class HandlerSpec extends WordSpec with MockitoSugar with Matchers  {
 
       when(s3Client.generatePresignedUrl(any())) thenReturn fakePresignedUrl
 
-      ".handleRequest response returns a redirect" ignore {
+      ".handleRequest response returns a redirect" in {
         val handler = module.lambdaHandler
 
         val response = handler.handleRequest(req, context)
 
-        response.getStatusCode shouldBe 201
+        response.getStatusCode shouldBe 301
         response.getBody shouldBe ""
         response.getHeaders shouldBe Map("Location" -> fakePresignedUrl.toString).asJava
       }

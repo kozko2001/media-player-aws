@@ -8,4 +8,5 @@ trait AppModule {
   lazy val infoHandler = wire[InfoHandler]
   lazy val lambdaHandler = wire[LambdaHandler]
   lazy val unknownHandler = wire[UnknownHandler]
+  lazy val downloadHandler = (file: String) => wire[DownloadHandler]
 }
