@@ -107,7 +107,7 @@ resource "aws_iam_policy" "lambda_s3" {
       "Action": [
         "s3:*"
       ],
-      "Resource": "${aws_s3_bucket.bucket.arn}",
+      "Resource": "${aws_s3_bucket.bucket.arn}*",
       "Effect": "Allow"
     }
   ]
