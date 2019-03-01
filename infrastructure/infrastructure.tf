@@ -12,6 +12,38 @@ resource "aws_s3_bucket" "bucket" {
   }
 }
 
+resource "aws_s3_bucket" "page-bucket" {
+  bucket = "${var.name-suffix}mediaplayeraws.allocsoc.net"
+  acl    = "public-read"
+  website {
+    index_document = "index.html"
+    error_document = "error.html"
+  }
+  policy = <<POLICY
+{
+  "Version":"2012-10-17",
+  "Statement":[
+    {
+      "Sid":"AddPerm",
+      "Effect":"Allow",
+      "Principal": "*",
+      "Action":["s3:GetObject"],
+      "Resource":["arn:aws:s3:::kzkmediaplayeraws.allocsoc.net/*"]
+    }
+  ]
+}
+POLICY
+}
+
+resource "aws_s3_bucket_object" "index_js" {
+  key        = "index.html"
+  bucket     = "${aws_s3_bucket.page-bucket.id}"
+  source     = "../web/index.html"
+  content_disposition = "inline"
+  content_type = "text/html; charset=utf-8"
+}
+
+
 ## lambda
 data "aws_iam_policy_document" "policy" {
   statement {
