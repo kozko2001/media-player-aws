@@ -4,13 +4,15 @@ import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import com.amazonaws.services.s3.AmazonS3Client
-import com.amazonaws.services.s3.model.{ ObjectListing, S3ObjectSummary }
+import com.amazonaws.services.s3.model.{ObjectListing, S3ObjectSummary}
 import java.net.URL
-import org.scalatest.{ Matchers, WordSpec }
+
+import org.scalatest.{Entry, Matchers, WordSpec}
 import org.scalatest.mockito.MockitoSugar
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import play.api.libs.json._
+
 import scala.collection.JavaConverters._
 
 
@@ -27,11 +29,11 @@ class HandlerSpec extends WordSpec with MockitoSugar with Matchers  {
     when(req.getPath) thenReturn "/info.json"
 
     "the s3 bucket has 2 files" when {
+      val module = new AppModuleTest()
+      val s3Client = module.s3Client
       val objectListing = mock[ObjectListing]
       val obj1 = HandlerSpec.objectCreate("CelineDion-Titanic.mp3")
       val obj2 = HandlerSpec.objectCreate("LaMacarena")
-      val module = new AppModuleTest()
-      val s3Client = module.s3Client
 
       when(s3Client.listObjects(anyString(), anyString())) thenReturn objectListing
       when(objectListing.getObjectSummaries) thenReturn (obj1 :: obj2 :: Nil) .asJava
@@ -47,6 +49,14 @@ class HandlerSpec extends WordSpec with MockitoSugar with Matchers  {
         response.getStatusCode shouldBe 200
         model.get.files should have size 2
         model.get.files{0} shouldBe "CelineDion-Titanic.mp3"
+      }
+
+      ".handlerequest response should be CORS" in {
+        val handler = module.lambdaHandler
+
+        val response = handler.handleRequest(req, context)
+
+        response.getHeaders should contain (Entry("Access-Control-Allow-Origin", "*"))
       }
     }
 
@@ -91,7 +101,7 @@ class HandlerSpec extends WordSpec with MockitoSugar with Matchers  {
     }
   }
 
-  "Given a unvalid request" when {
+  "Given a invalid request" when {
     val context = mock[Context]
     val req = mock[APIGatewayProxyRequestEvent]
     val module = new AppModuleTest()

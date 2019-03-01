@@ -62,7 +62,7 @@ class LambdaHandler(infoHandler: InfoHandler, unknownHandler: UnknownHandler, do
 
 object LambdaHandler {
   def response(body: String, status: Int = 200, headers: Option[Map[String, String]] = None) = {
-    val defaultHeaders = Map("Content-Type" -> "application/json")
+    val defaultHeaders = Map("Content-Type" -> "application/json", "Access-Control-Allow-Origin" -> "*")
 
     new APIGatewayProxyResponseEvent()
       .withBody(body)
