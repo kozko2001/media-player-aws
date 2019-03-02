@@ -10,18 +10,35 @@
         <!-- Webamp will attempt to center itself within this div -->
     </div>
     <script src="https://unpkg.com/webamp@1.2.0/built/webamp.bundle.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
     <script>
+      const instance = axios.create({
+        baseURL: 'http://lambda.allocsoc.net'
+      });
+
+      async function initWinamp() {
+        const response = await instance.get('/info.json')
+        const files = response.data.files.map(f => "http://lambda.allocsoc.net/download/music/lamacarena.mp3")
+        const tracks = files.map(f => {
+          return {
+            metaData: {
+              artist: f,
+              title: f
+            },
+            url: f
+          }})
+        console.log(files)
         const Webamp = window.Webamp;
         new Webamp({
-            initialTracks: [{
-                metaData: {
-                    artist: "DJ Mike Llama",
-                    title: "Llama Whippin' Intro"
-                },
-                url: "https://cdn.jsdelivr.net/gh/captbaritone/webamp@43434d82cfe0e37286dbbe0666072dc3190a83bc/mp3/llama-2.91.mp3",
-                duration: 5.322286
-            }],
+          initialTracks: tracks
         }).renderWhenReady(document.getElementById('app'));
+      }
+
+      initWinamp().then(() => {
+        console.log("DONE")
+      })
+
     </script>
 </body>
 

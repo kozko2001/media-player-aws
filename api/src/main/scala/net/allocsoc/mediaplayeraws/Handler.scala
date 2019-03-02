@@ -18,6 +18,8 @@ case class RequestInfo() extends RequestType
 case class RequestDownload(file: String) extends RequestType
 case class RequestUnknown() extends RequestType
 
+
+
 class Handler extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent] with AppModule {
 
   def handleRequest(req: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent = {
@@ -62,13 +64,15 @@ class LambdaHandler(infoHandler: InfoHandler, unknownHandler: UnknownHandler, do
 
 object LambdaHandler {
   def response(body: String, status: Int = 200, headers: Option[Map[String, String]] = None) = {
-    val defaultHeaders = Map("Content-Type" -> "application/json", "Access-Control-Allow-Origin" -> "*")
+    val defaultHeaders = Map("Content-Type" -> "application/json") ++ CORS_HEADERS
 
     new APIGatewayProxyResponseEvent()
       .withBody(body)
       .withStatusCode(status)
       .withHeaders( headers.getOrElse(defaultHeaders) .asJava)
   }
+
+  val CORS_HEADERS = Map("Access-Control-Allow-Origin" -> "*")
 }
 
 
@@ -96,15 +100,13 @@ class InfoHandler(s3Client: AmazonS3) extends MediaPlayerRequestHandler {
 
 class DownloadHandler(file: String, s3Client: AmazonS3) extends MediaPlayerRequestHandler {
   val bucketName = "media-player-aws-kzk"
-  val expirationDate = Date.from (Instant.now().plus(Duration.ofHours(1)))
 
   def handler() = {
     val req = new GeneratePresignedUrlRequest(bucketName, file)
-      .withExpiration(expirationDate)
 
     val url = s3Client.generatePresignedUrl(req).toString()
 
-    LambdaHandler.response("", 301, Some(Map("Location" -> url)))
+    LambdaHandler.response("", 301, Some(Map("Location" -> url) ++ LambdaHandler.CORS_HEADERS))
   }
 }
 

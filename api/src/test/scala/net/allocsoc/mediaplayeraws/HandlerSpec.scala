@@ -96,7 +96,7 @@ class HandlerSpec extends WordSpec with MockitoSugar with Matchers  {
 
         response.getStatusCode shouldBe 301
         response.getBody shouldBe ""
-        response.getHeaders shouldBe Map("Location" -> fakePresignedUrl.toString).asJava
+        response.getHeaders should contain (Entry("Location", fakePresignedUrl.toString))
       }
     }
   }
