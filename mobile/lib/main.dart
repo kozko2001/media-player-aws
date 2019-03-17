@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import './request.dart';
+import './downloader.dart';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -33,14 +33,14 @@ class MusicListState extends State<MusicList> {
   _getInfo() async {
     var info = await fetchInfo(http.Client());
     setState(() {
-        songs = info.files;
+      songs = info.files;
     });
   }
 
-   initState() {
+  initState() {
     super.initState();
     _getInfo();
-}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +49,7 @@ class MusicListState extends State<MusicList> {
           itemBuilder: (context, index) {
             return ListTile(
               title: Text(songs[index]),
-              onTap: () => print("heeeloo")
+              onTap: () => downloadFile(songs[index])
               );
           },
     );
